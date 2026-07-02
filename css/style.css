@@ -35,6 +35,15 @@ header h1 {
   margin: 0;
 }
 
+header .nav-link {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: var(--ink);
+  opacity: 0.7;
+  text-decoration: underline;
+}
+
 main {
   max-width: 900px;
   margin: 0 auto;

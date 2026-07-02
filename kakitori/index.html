@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>かきとりんぐ</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="app">
+
+  <div id="themePicker" class="overlay hidden">
+    <div class="overlay-card">
+      <h2>どっちで あそぶ?</h2>
+      <div class="theme-choices">
+        <button id="pickBoy" class="theme-btn theme-btn-boy">
+          <span class="emoji">🚀</span><span class="label">男の子モード</span>
+        </button>
+        <button id="pickGirl" class="theme-btn theme-btn-girl">
+          <span class="emoji">🌸</span><span class="label">女の子モード</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <header class="topbar">
+    <a href="../index.html" class="icon-btn" title="オトツクリへ">🎵</a>
+    <h1>✏️ かきとりんぐ</h1>
+    <button id="themeToggleBtn" class="icon-btn" title="モードきりかえ">⚙️</button>
+  </header>
+
+  <div class="stats-bar">
+    <span class="stat" title="れんぞく にちすう">🔥<b id="statStreak">0</b></span>
+    <span class="stat" title="コイン">🪙<b id="statCoins">0</b></span>
+    <span class="stat quest" title="きょうの もくひょう">🎯<b id="statQuest">0/10</b></span>
+  </div>
+
+  <section id="screenMenu" class="screen">
+    <h2>もじを えらんでね</h2>
+    <div class="grid set-grid">
+      <button class="card set-card selected" data-set="hiragana">
+        <span class="emoji">あ</span><span class="label">ひらがな</span>
+        <span class="progress-label" data-progress="hiragana">0/71</span>
+      </button>
+      <button class="card set-card" data-set="katakana">
+        <span class="emoji">ア</span><span class="label">カタカナ</span>
+        <span class="progress-label" data-progress="katakana">0/71</span>
+      </button>
+      <button class="card set-card" data-set="kanji">
+        <span class="emoji">一</span><span class="label">かんじ(1年生)</span>
+        <span class="progress-label" data-progress="kanji">0/80</span>
+      </button>
+    </div>
+
+    <h2>モードを えらんでね</h2>
+    <div class="grid mode-grid">
+      <button class="card mode-card selected" data-mode="practice">
+        <span class="emoji">✏️</span><span class="label">なぞって れんしゅう</span>
+      </button>
+      <button class="card mode-card" data-mode="test">
+        <span class="emoji">📝</span><span class="label">テストに ちょうせん</span>
+      </button>
+    </div>
+
+    <button id="startBtn" class="transport-btn">▶️ はじめる</button>
+  </section>
+
+  <section id="screenPractice" class="screen hidden">
+    <div class="char-info">
+      <div class="mascot-bubble">
+        <span id="mascotEmoji" class="mascot-emoji">🚀</span>
+        <p id="mascotText">なぞって かいてみよう!</p>
+      </div>
+      <div class="reading" id="practiceReading"></div>
+      <div class="word-hint"><span id="practiceEmoji" class="word-emoji"></span><span id="practiceWord"></span></div>
+    </div>
+    <div class="canvas-wrap">
+      <canvas id="practiceCanvas"></canvas>
+      <div id="practiceFeedback" class="feedback-badge hidden"></div>
+    </div>
+    <div class="canvas-controls">
+      <button id="demoBtn" class="small-btn">👀 おてほん</button>
+      <button id="redoStrokeBtn" class="small-btn">↩️ もういちど</button>
+    </div>
+    <div class="session-progress"><div id="sessionBarPractice" class="session-bar-fill"></div></div>
+    <button id="backToMenuFromPractice" class="link-btn">← メニューへ もどる</button>
+  </section>
+
+  <section id="screenTest" class="screen hidden">
+    <div class="char-info">
+      <div class="mascot-bubble">
+        <span id="testMascotEmoji" class="mascot-emoji">🚀</span>
+        <p id="testMascotText">おもいだして かいてみよう!</p>
+      </div>
+      <div class="reading" id="testReading"></div>
+      <div class="word-hint"><span id="testEmoji" class="word-emoji"></span><span id="testWord"></span></div>
+    </div>
+    <div class="canvas-wrap">
+      <canvas id="testCanvas"></canvas>
+    </div>
+    <div class="canvas-controls">
+      <button id="hintBtn" class="small-btn">💡 ヒント</button>
+      <button id="undoStrokeTestBtn" class="small-btn">↩️ ひとつ けす</button>
+      <button id="clearTestBtn" class="small-btn">🗑️ ぜんぶ けす</button>
+    </div>
+    <button id="submitTestBtn" class="transport-btn">✅ これで けってい</button>
+    <div class="session-progress"><div id="sessionBarTest" class="session-bar-fill"></div></div>
+    <button id="backToMenuFromTest" class="link-btn">← メニューへ もどる</button>
+  </section>
+
+  <div id="resultOverlay" class="overlay hidden">
+    <div class="overlay-card">
+      <h2 id="resultTitle"></h2>
+      <p id="resultDetail"></p>
+      <button id="resultContinueBtn" class="transport-btn">つづける</button>
+    </div>
+  </div>
+
+  <div id="questOverlay" class="overlay hidden">
+    <div class="overlay-card">
+      <h2>🎉 きょうの もくひょう たっせい!</h2>
+      <p>ボーナス 🪙20 ゲット!また あした も がんばろう!</p>
+      <button id="questContinueBtn" class="transport-btn">やったー!</button>
+    </div>
+  </div>
+
+  <div id="sessionEndOverlay" class="overlay hidden">
+    <div class="overlay-card">
+      <h2 id="sessionEndTitle">よくがんばったね!</h2>
+      <p id="sessionEndDetail"></p>
+      <button id="sessionEndContinueBtn" class="transport-btn">もっと れんしゅう</button>
+      <button id="sessionEndMenuBtn" class="link-btn">メニューへ もどる</button>
+    </div>
+  </div>
+
+</div>
+
+<script src="js/strokes-hiragana.js"></script>
+<script src="js/strokes-katakana.js"></script>
+<script src="js/strokes-kanji-g1.js"></script>
+<script src="js/content-hiragana.js"></script>
+<script src="js/content-katakana.js"></script>
+<script src="js/content-kanji-g1.js"></script>
+<script src="js/progress.js"></script>
+<script src="js/canvas.js"></script>
+<script src="js/scoring.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
