@@ -1,0 +1,227 @@
+:root {
+  --bg: #FFF8E7;
+  --coral: #FF6B6B;
+  --yellow: #FFD93D;
+  --sky: #4FC3F7;
+  --green: #6BCB77;
+  --pink: #FF8FD8;
+  --purple: #B388FF;
+  --orange: #FFA451;
+  --turquoise: #3FE0D0;
+  --ink: #4A4453;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0 16px 140px;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
+  text-align: center;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+header {
+  padding: 24px 0 8px;
+}
+
+header h1 {
+  font-size: 2.2rem;
+  margin: 0;
+}
+
+main {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+section {
+  margin: 24px 0;
+}
+
+section h2 {
+  font-size: 1.8rem;
+  margin: 0 0 12px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.card {
+  min-height: 104px;
+  border: none;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 10px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card:active {
+  transform: scale(0.96);
+}
+
+.card .emoji {
+  font-size: 2.6rem;
+  line-height: 1;
+}
+
+.card .label {
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.phrase-card.selected {
+  outline: 5px solid var(--sky);
+  transform: scale(1.05);
+  box-shadow: 0 0 0 6px rgba(79, 195, 247, 0.35);
+}
+
+.mood-card.selected {
+  outline: 5px solid var(--pink);
+  transform: scale(1.05);
+  box-shadow: 0 0 0 6px rgba(255, 143, 216, 0.35);
+}
+
+.style-card.selected {
+  outline: 5px solid var(--green);
+  transform: scale(1.05);
+  box-shadow: 0 0 0 6px rgba(107, 203, 119, 0.35);
+}
+
+.hidden {
+  display: none !important;
+}
+
+.pad-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: 10px;
+}
+
+.pad {
+  min-height: 96px;
+  border: none;
+  border-radius: 18px;
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.15);
+}
+
+.pad:active {
+  transform: translateY(3px);
+  box-shadow: none;
+}
+
+.pad-0 { background: var(--coral); }
+.pad-1 { background: var(--orange); }
+.pad-2 { background: var(--yellow); color: var(--ink); }
+.pad-3 { background: var(--green); }
+.pad-4 { background: var(--sky); }
+.pad-5 { background: var(--purple); }
+
+.note-strip {
+  min-height: 32px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  margin: 14px 0;
+}
+
+.dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.dot-0 { background: var(--coral); }
+.dot-1 { background: var(--orange); }
+.dot-2 { background: var(--yellow); }
+.dot-3 { background: var(--green); }
+.dot-4 { background: var(--sky); }
+.dot-5 { background: var(--purple); }
+
+.compose-controls {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.small-btn {
+  border: none;
+  border-radius: 14px;
+  background: #ffffff;
+  padding: 12px 18px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+}
+
+.small-btn:active {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+
+.transport {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(180deg, rgba(255, 248, 231, 0), var(--bg) 30%);
+  padding: 16px 0 24px;
+}
+
+.transport-btn {
+  width: min(92%, 420px);
+  min-height: 96px;
+  border: none;
+  border-radius: 28px;
+  background: var(--coral);
+  color: #fff;
+  font-size: 1.6rem;
+  font-weight: bold;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+}
+
+.transport-btn:active {
+  transform: translateY(4px);
+  box-shadow: none;
+}
+
+.transport-btn:disabled {
+  background: #d9d3c9;
+  color: #9a9184;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+@media (min-width: 900px) {
+  body {
+    padding-bottom: 40px;
+  }
+  .transport {
+    position: static;
+    background: none;
+  }
+}

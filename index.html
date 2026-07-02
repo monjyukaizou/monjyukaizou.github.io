@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>オトツクリ</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header>
+  <h1>🎵 オトツクリ 🎵</h1>
+</header>
+
+<main>
+  <section id="phraseSection">
+    <h2>🎼</h2>
+    <div class="grid">
+      <button class="card phrase-card" data-phrase="kirakira">
+        <span class="emoji">🌟</span><span class="label">キラキラボシ</span>
+      </button>
+      <button class="card phrase-card" data-phrase="kaeru">
+        <span class="emoji">🐸</span><span class="label">カエルノウタ</span>
+      </button>
+      <button class="card phrase-card" data-phrase="chocho">
+        <span class="emoji">🦋</span><span class="label">チョウチョ</span>
+      </button>
+      <button class="card phrase-card" data-phrase="london">
+        <span class="emoji">🌉</span><span class="label">ロンドンバシ</span>
+      </button>
+      <button class="card phrase-card" data-phrase="mary">
+        <span class="emoji">🐑</span><span class="label">メリーサンノヒツジ</span>
+      </button>
+      <button class="card phrase-card" data-phrase="elise">
+        <span class="emoji">🎹</span><span class="label">エリーゼノタメニ</span>
+      </button>
+      <button class="card phrase-card" data-phrase="custom">
+        <span class="emoji">✏️</span><span class="label">ジブンデツクル</span>
+      </button>
+    </div>
+  </section>
+
+  <section id="moodSection">
+    <h2>🌈</h2>
+    <div class="grid">
+      <button class="card mood-card" data-mood="wakuwaku">
+        <span class="emoji">🤩</span><span class="label">ワクワク</span>
+      </button>
+      <button class="card mood-card" data-mood="yumemiru">
+        <span class="emoji">✨</span><span class="label">ユメミル</span>
+      </button>
+      <button class="card mood-card" data-mood="nonbiri">
+        <span class="emoji">😌</span><span class="label">ノンビリ</span>
+      </button>
+      <button class="card mood-card" data-mood="kakkoii">
+        <span class="emoji">😎</span><span class="label">カッコイイ</span>
+      </button>
+      <button class="card mood-card" data-mood="shiawase">
+        <span class="emoji">😊</span><span class="label">シアワセ</span>
+      </button>
+      <button class="card mood-card" data-mood="fushigi">
+        <span class="emoji">🤔</span><span class="label">フシギ</span>
+      </button>
+    </div>
+  </section>
+
+  <section id="styleSection">
+    <h2>🎧</h2>
+    <div class="grid">
+      <button class="card style-card" data-style="pop">
+        <span class="emoji">🎤</span><span class="label">ポップ</span>
+      </button>
+      <button class="card style-card" data-style="lofi">
+        <span class="emoji">🎧</span><span class="label">ローファイ</span>
+      </button>
+      <button class="card style-card" data-style="edm">
+        <span class="emoji">🕺</span><span class="label">イーディーエム</span>
+      </button>
+      <button class="card style-card" data-style="rock">
+        <span class="emoji">🎸</span><span class="label">ロック</span>
+      </button>
+    </div>
+  </section>
+
+  <section id="composeSection" class="hidden">
+    <h2>✏️</h2>
+    <div class="pad-grid">
+      <button class="pad pad-0" data-pitch="C4">ド</button>
+      <button class="pad pad-1" data-pitch="D4">レ</button>
+      <button class="pad pad-2" data-pitch="E4">ミ</button>
+      <button class="pad pad-3" data-pitch="G4">ソ</button>
+      <button class="pad pad-4" data-pitch="A4">ラ</button>
+      <button class="pad pad-5" data-pitch="C5">ド↑</button>
+    </div>
+    <div id="noteStrip" class="note-strip"></div>
+    <div class="compose-controls">
+      <button id="undoBtn" class="small-btn">↩️ モドス</button>
+      <button id="clearBtn" class="small-btn">🗑️ ケス</button>
+    </div>
+  </section>
+</main>
+
+<div class="transport">
+  <button id="playBtn" class="transport-btn" disabled>▶️ ナラス</button>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
