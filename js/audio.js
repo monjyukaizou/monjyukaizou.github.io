@@ -69,16 +69,20 @@ const OtoAudio = (() => {
 
   function playMelody(notes, bpm, waveform, startAt) {
     let t = startAt;
+    const events = [];
     notes.forEach((n) => {
       const dur = beatsToSeconds(n.dur, bpm);
-      scheduleTone(noteToFreq(n.pitch), t, dur * 0.92, waveform, 0.25);
+      const noteDur = dur * 0.92;
+      scheduleTone(noteToFreq(n.pitch), t, noteDur, waveform, 0.25);
+      events.push({ pitch: n.pitch, startTime: t, duration: noteDur, kind: "melody" });
       t += dur;
     });
-    return t;
+    return { endTime: t, events };
   }
 
   function playChordLoop(chordSymbols, chordTones, bpm, startAt, totalDurationSeconds, pattern) {
-    if (!chordSymbols || chordSymbols.length === 0) return;
+    const events = [];
+    if (!chordSymbols || chordSymbols.length === 0) return { events };
     const beatsPerChord = 4;
     const barSeconds = beatsToSeconds(beatsPerChord, bpm);
     let t = startAt;
@@ -88,20 +92,25 @@ const OtoAudio = (() => {
       const tones = chordTones[sym] || [];
       if (pattern === "pulse8") {
         const pulseSeconds = barSeconds / 8;
+        const pulseDur = pulseSeconds * 0.85;
         for (let p = 0; p < 8; p++) {
           const pt = t + p * pulseSeconds;
-          tones.forEach((pitch) =>
-            scheduleTone(noteToFreq(pitch), pt, pulseSeconds * 0.85, "triangle", 0.1)
-          );
+          tones.forEach((pitch) => {
+            scheduleTone(noteToFreq(pitch), pt, pulseDur, "triangle", 0.1);
+            events.push({ pitch, startTime: pt, duration: pulseDur, kind: "chord" });
+          });
         }
       } else {
-        tones.forEach((pitch) =>
-          scheduleTone(noteToFreq(pitch), t, barSeconds * 0.95, "sine", 0.09)
-        );
+        const chordDur = barSeconds * 0.95;
+        tones.forEach((pitch) => {
+          scheduleTone(noteToFreq(pitch), t, chordDur, "sine", 0.09);
+          events.push({ pitch, startTime: t, duration: chordDur, kind: "chord" });
+        });
       }
       t += barSeconds;
       i++;
     }
+    return { events };
   }
 
   function stopAll() {

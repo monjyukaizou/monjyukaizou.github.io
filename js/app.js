@@ -11,6 +11,9 @@
   };
 
   let playEndTimer = null;
+  let highlightTimers = [];
+  const keyEls = new Map();
+  const activeHighlights = new Map();
 
   let playBtn, styleSection, composeSection, noteStrip;
 
@@ -19,6 +22,10 @@
     styleSection = document.getElementById("styleSection");
     composeSection = document.getElementById("composeSection");
     noteStrip = document.getElementById("noteStrip");
+
+    document.querySelectorAll("#pianoKeyboard [data-pitch]").forEach((key) => {
+      keyEls.set(key.dataset.pitch, key);
+    });
 
     document.querySelectorAll("[data-phrase]").forEach((card) => {
       card.addEventListener("click", () => onPhraseCard(card.dataset.phrase));
@@ -29,7 +36,7 @@
     document.querySelectorAll("[data-style]").forEach((card) => {
       card.addEventListener("click", () => onStyleCard(card.dataset.style));
     });
-    document.querySelectorAll("[data-pitch]").forEach((pad) => {
+    document.querySelectorAll(".pad[data-pitch]").forEach((pad) => {
       pad.addEventListener("click", () => onPad(pad.dataset.pitch));
     });
 
@@ -49,6 +56,57 @@
       clearTimeout(playEndTimer);
       updatePlayButton();
     }
+    resetAllHighlights();
+  }
+
+  function scheduleHighlightEvents(events) {
+    const ctx = OtoAudio.context;
+    if (!ctx || !events) return;
+    events.forEach((evt) => scheduleHighlight(ctx, evt));
+  }
+
+  function scheduleHighlight(ctx, { pitch, startTime, duration, kind }) {
+    const onDelayMs = Math.max(0, (startTime - ctx.currentTime) * 1000);
+    const offDelayMs = Math.max(0, (startTime + duration - ctx.currentTime) * 1000);
+    highlightTimers.push(setTimeout(() => noteOn(pitch, kind), onDelayMs));
+    highlightTimers.push(setTimeout(() => noteOff(pitch, kind), offDelayMs));
+  }
+
+  function noteOn(pitch, kind) {
+    const counts = activeHighlights.get(pitch) || { melody: 0, chord: 0 };
+    counts[kind] += 1;
+    activeHighlights.set(pitch, counts);
+    refreshKeyVisual(pitch);
+  }
+
+  function noteOff(pitch, kind) {
+    const counts = activeHighlights.get(pitch);
+    if (!counts) return;
+    counts[kind] = Math.max(0, counts[kind] - 1);
+    refreshKeyVisual(pitch);
+  }
+
+  function refreshKeyVisual(pitch) {
+    const key = keyEls.get(pitch);
+    if (!key) return;
+    const counts = activeHighlights.get(pitch) || { melody: 0, chord: 0 };
+    key.classList.remove("key-melody-active", "key-chord-active", "key-both-active");
+    if (counts.melody > 0 && counts.chord > 0) {
+      key.classList.add("key-both-active");
+    } else if (counts.melody > 0) {
+      key.classList.add("key-melody-active");
+    } else if (counts.chord > 0) {
+      key.classList.add("key-chord-active");
+    }
+  }
+
+  function resetAllHighlights() {
+    highlightTimers.forEach((id) => clearTimeout(id));
+    highlightTimers = [];
+    activeHighlights.clear();
+    keyEls.forEach((key) => {
+      key.classList.remove("key-melody-active", "key-chord-active", "key-both-active");
+    });
   }
 
   function onPhraseCard(id) {
@@ -76,7 +134,8 @@
 
   function onPad(pitch) {
     const ctx = OtoAudio.initAudio();
-    OtoAudio.playMelody([{ pitch, dur: 0.5 }], 120, "triangle", ctx.currentTime + 0.02);
+    const result = OtoAudio.playMelody([{ pitch, dur: 0.5 }], 120, "triangle", ctx.currentTime + 0.02);
+    scheduleHighlightEvents(result.events);
     state.composedNotes.push({ pitch, dur: 1 });
     renderNoteStrip();
     updateTransportEnabled();
@@ -105,6 +164,7 @@
   function startPlayback() {
     const ctx = OtoAudio.initAudio();
     OtoAudio.stopAll();
+    resetAllHighlights();
 
     let notes, bpm, wave, chords, pattern;
 
@@ -129,10 +189,12 @@
     }
 
     const startAt = ctx.currentTime + 0.06;
-    OtoAudio.playMelody(notes, bpm, wave, startAt);
+    const melodyResult = OtoAudio.playMelody(notes, bpm, wave, startAt);
+    scheduleHighlightEvents(melodyResult.events);
     const totalSeconds = OtoAudio.beatsToSeconds(OtoAudio.totalBeats(notes), bpm);
     if (chords && chords.length) {
-      OtoAudio.playChordLoop(chords, CHORD_TONES, bpm, startAt, totalSeconds, pattern);
+      const chordResult = OtoAudio.playChordLoop(chords, CHORD_TONES, bpm, startAt, totalSeconds, pattern);
+      scheduleHighlightEvents(chordResult.events);
     }
 
     state.isPlaying = true;
