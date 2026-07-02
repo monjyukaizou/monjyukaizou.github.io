@@ -13,21 +13,26 @@ required.
 The live site is now a real, working page: **オトツクリ** ("Oto Tsukuri"),
 a touch-friendly music composition toy aimed at elementary-school kids. It's
 served from `index.html` at the repo root, per standard GitHub Pages
-behavior.
+behavior. The site has grown a second, independent app under `kakitori/`
+(see below) — the root `index.html` and `kakitori/index.html` are two
+separate single-page apps, cross-linked to each other, not one multi-page
+app.
 
 ## Current file inventory
 
 ```
-index.html       live site markup (オトツクリ app)
-css/style.css    all styles for the app
-js/data.js       static data only — phrases, moods, styles, chord tones
-js/audio.js      Web Audio playback engine — no DOM access
-js/app.js        DOM wiring + state management, ties data + audio together
-README.md        NOT project documentation — see below
-CLAUDE.md        this file
+index.html          root site markup (オトツクリ music app)
+css/style.css       styles for the オトツクリ app
+js/data.js          static data only — phrases, moods, styles, chord tones
+js/audio.js         Web Audio playback engine — no DOM access
+js/app.js           DOM wiring + state management, ties data + audio together
+kakitori/           second app: かきとりんぐ, a kana/kanji writing-practice
+                    game — see its own section below
+README.md           NOT project documentation — see below
+CLAUDE.md           this file
 ```
 
-There is no `.gitignore`, no image assets, and no other files or directories.
+There is no `.gitignore` and no other files or directories beyond the above.
 
 ### `README.md` is orphaned game HTML, not documentation
 
@@ -76,6 +81,86 @@ Load order in `index.html` matters: `data.js` → `audio.js` → `app.js`
 (later files depend on globals — `PHRASES`/`MOODS`/etc. and `OtoAudio` —
 defined by earlier ones).
 
+## App architecture (`かきとりんぐ`, under `kakitori/`)
+
+A hiragana/katakana/grade-1-kanji writing-practice game for kids, served at
+`/kakitori/index.html` (its own self-contained static app: `kakitori/css/`,
+`kakitori/js/`). It links back to the root オトツクリ app via a header icon,
+and the root `index.html` links to it via a header nav-link — the two apps
+don't otherwise share code.
+
+**Content covered**: 71 hiragana (base gojūon + dakuten/handakuten), 71
+katakana (same shape), and the 80 grade-1 kyōiku kanji. Contracted sounds
+(きゃ etc.) and grades 2–6 kanji are not in yet — see "extending the content"
+below.
+
+**Stroke data pipeline (build-time, not part of the shipped app)**: stroke
+shapes come from the [KanjiVG](http://kanjivg.tagaini.net) project (CC
+BY-SA 3.0 — see `kakitori/CREDITS.md`). SVG stroke paths were fetched, resampled
+to fixed-length point arrays, and each stroke's ending was classified as
+とめ/はね/はらい (tome/hane/harai) — from KanjiVG's own `kvg:type`
+annotations for kanji, or from stroke-endpoint geometry (a sharp direction
+reversal = hane) for kana, which aren't annotated in KanjiVG. The result is
+committed directly as plain JS data files (`kakitori/js/strokes-*.js`); there
+is no build step in the shipped app, and regenerating this data requires
+re-running an external fetch+parse script (not part of this repo) against
+KanjiVG.
+
+**Runtime files** (load order matters — later files depend on globals from
+earlier ones):
+```
+js/strokes-hiragana.js    js/content-hiragana.js     progress.js
+js/strokes-katakana.js  → js/content-katakana.js  →  canvas.js   → game.js
+js/strokes-kanji-g1.js    js/content-kanji-g1.js      scoring.js
+```
+- **`strokes-*.js`** — per character: `{ strokeCount, viewBox: 109, strokes:
+  [{ pts: [[x,y]...32], kind: "tome"|"hane"|"harai" }] }`. Pure data.
+- **`content-*.js`** — per character: reading(s) + example word(s). Kana
+  entries have one neutral `word`/`gloss`/`emoji`. Kanji entries have
+  `on`/`kun`/`meaning` plus **two** themed example words, `wordBoy` and
+  `wordGirl` (vehicles/sports vs. flowers/sweets/animals, per the boy/girl
+  mode split below) — kana content is not theme-split, only kanji is.
+- **`canvas.js`** (`KakitoriCanvas`) — canvas rendering (reference-stroke
+  ghost/guide, animated demo playback) + pointer-event capture. No scoring
+  logic, no game state.
+- **`scoring.js`** (`KakitoriScoring`) — resamples a drawn stroke to match
+  the reference's point count and scores shape/start/end proximity, with a
+  hane-hook geometry check mirroring the build-time classifier. Pure
+  functions, no DOM.
+- **`progress.js`** (`KakitoriProgress`) — all `localStorage` state: daily
+  streak, coins, per-character mastery level (drives weighted-random
+  question selection so weak characters resurface more), daily 10-question
+  quest, and the boy/girl theme choice.
+- **`game.js`** — the only file that touches the DOM; wires up the menu,
+  practice mode, test mode, and overlays, and is the sole place that reads
+  `currentMode`/`currentChar`/`currentStrokeIdx` session state.
+
+**Two modes, deliberately different prompts**:
+- **なぞって れんしゅう (practice/trace)** — shows the full character ghosted
+  plus an animated guide for the current stroke; the reading and themed word
+  are shown too, since this mode is about learning correct stroke
+  order/shape, not recall.
+- **テストに ちょうせん (test/recall)** — shows *only* the reading + themed
+  word (like a real 書き取りテスト dictation test); the character shape is
+  never displayed, so the kid must recall and draw it from memory across
+  however many strokes they think it takes. A ヒント (hint) button reveals
+  the ghost on demand at a small score penalty.
+
+**Extending the content**: grade 2+ kanji or きゃ/しゅ/ちょ-style contracted
+sounds are the natural next additions — they need both a stroke-data entry
+(from KanjiVG, same pipeline as above) and a content entry (readings +
+boy/girl example words). Keep new sets as sibling `strokes-*.js`/
+`content-*.js` files and register them in the `SETS` map in `game.js` rather
+than overloading the existing three.
+
+There's a subtle timing detail worth knowing if touching `game.js`: after a
+practice character's last stroke, there's a deliberate ~800ms UI pause
+(feedback badge, then a settle beat) before the next character loads, but the
+canvas keeps accepting pointer input the whole time — `handlePracticeStroke`
+guards on `currentStrokeIdx >= currentRef.length` to silently ignore stray
+strokes drawn during that window instead of indexing past the end of
+`currentRef`.
+
 ## Tooling & workflow reality check
 
 There is no build step, no package manager, no CI/CD, no test suite, and no
@@ -94,6 +179,13 @@ and sound plays. There's no automated test suite to run. Web Audio requires a
 user gesture to start, so playback won't work by simulating clicks without a
 real (or trusted) browser interaction.
 
+For `kakitori/`, verify the same way (open `kakitori/index.html`, or use the
+same local server) and actually draw on the canvas — pick a character set +
+mode, trace a few strokes, and confirm feedback/scoring/streak/coins update.
+A real browser (Playwright with pointer events works fine) is required since
+the drawing surface is a `<canvas>`; there's no way to meaningfully verify
+this app by reading the code alone.
+
 ## Conventions
 
 - **Commits**: history is short with plain, unprefixed, short titles
@@ -104,11 +196,14 @@ real (or trusted) browser interaction.
   `index.html` / `css/style.css` / `js/*.js` files, each `js` file an IIFE
   where appropriate. Match the existing data/audio/app separation described
   above rather than reverting to single-file inline style.
-- Japanese UI strings and comments are used throughout (`data.js`, `app.js`
-  comments are in Japanese) — match this when adding to the existing app.
-- **Future growth**: if the site grows beyond this one app, an `/img` or
-  `/assets` folder is the natural next addition for shared media. This is a
-  suggestion for when the site actually grows, not an existing structure.
+- Japanese UI strings and comments are used throughout (`data.js`, `app.js`,
+  and everything under `kakitori/` use Japanese comments/strings) — match
+  this when adding to either app.
+- **Multi-app growth**: the site grew from one app to two via a sibling
+  top-level folder (`kakitori/`) with its own `css/`/`js/` and a cross-link
+  in each app's header, rather than merging into one page. If a third app
+  gets added, follow the same pattern (own folder, own assets, cross-linked
+  header nav) instead of entangling it with an existing app's files.
 
 ## Working guidance for AI assistants
 
@@ -122,3 +217,9 @@ real (or trusted) browser interaction.
   don't assume replacing it is in scope unless asked (see above).
 - When adding songs/moods/styles, prefer extending the tables in
   `js/data.js` over hardcoding values in `js/app.js`.
+- When adding characters/readings/words to `kakitori/`, prefer extending the
+  `strokes-*.js`/`content-*.js` data files over hardcoding values in
+  `game.js`, mirroring the `data.js` convention in the music app.
+- `kakitori/js/strokes-*.js` are generated data (see the KanjiVG pipeline
+  note above) — don't hand-edit stroke point arrays; regenerate them instead
+  if the underlying source data needs to change.
