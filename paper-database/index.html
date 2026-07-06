@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>紙データベース 計算シミュレーター(プロトタイプ)</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<h1>書籍作成シミュレーター 計算プロトタイプ</h1>
+<p class="notice">
+  design.md の「4. 重量・背幅の計算式」を実際に試すための最小プロトタイプです。
+  紙のデータ(js/data.js)はすべて架空のサンプル値で、実在銘柄のスペックではありません。
+  実運用時は schema.sql の paper_official_specs / paper_measured_specs に置き換えてください。
+</p>
+
+<form id="calc-form">
+  <label>ページ数
+    <input type="number" id="page-count" value="200" min="1">
+  </label>
+  <label>判型
+    <select id="trim-size"></select>
+  </label>
+  <label>製本方式
+    <select id="binding-type"></select>
+  </label>
+  <label>本文紙
+    <select id="paper"></select>
+  </label>
+  <label>表紙重量(g・任意入力)
+    <input type="number" id="cover-weight" value="0" min="0">
+  </label>
+  <button type="button" id="calc-button">計算する</button>
+</form>
+
+<div id="result">ページ数・判型・製本方式・本文紙を選んで「計算する」を押してください。</div>
+
+<script src="js/data.js"></script>
+<script src="js/calc.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
